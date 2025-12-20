@@ -22,7 +22,7 @@ public class SocialBusinessController {
     private final LikeRepository likeRepository;
     private final FollowRepository followRepository;
 
-    // 1️⃣ Лента подписок (Post + Follow + User)
+    // 1️ Лента подписок (Post + Follow + User)
     @GetMapping("/feed/{userId}")
     public ResponseEntity<?> getFeed(@PathVariable Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -44,7 +44,7 @@ public class SocialBusinessController {
         return ResponseEntity.ok(response);
     }
 
-    // 2️⃣ Аналитика поста (Post + Like + Comment)
+    // 2️ Аналитика поста (Post + Like + Comment)
     @GetMapping("/post/{postId}/analytics")
     public ResponseEntity<?> getPostAnalytics(@PathVariable Long postId) {
         Optional<Post> postOpt = postRepository.findById(postId);
@@ -65,30 +65,18 @@ public class SocialBusinessController {
         return ResponseEntity.ok(response);
     }
 
-    // 3️⃣ Кого подписать? (Follow + User) - рекомендации
+    // 3️ Кого подписать? (Follow + User) - рекомендации
+    // Простая версия: возвращает всех пользователей, кроме себя
     @GetMapping("/user/{userId}/recommendations")
     public ResponseEntity<?> getFollowRecommendations(@PathVariable Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 
-        // Находим, на кого подписан пользователь
-        List<Follow> userSubscriptions = followRepository.findByFollower(userOpt.get());
-        Set<Long> userFollowingIds = userSubscriptions.stream()
-                .map(f -> f.getFollowing().getId())
-                .collect(Collectors.toSet());
-
-        // Находим пользователей, на которых подписаны те, на кого подписан наш пользователь
-        Set<User> recommendations = new HashSet<>();
-        for (Follow sub : userSubscriptions) {
-            List<Follow> theirSubscriptions = followRepository.findByFollower(sub.getFollowing());
-            for (Follow theirSub : theirSubscriptions) {
-                User recommendedUser = theirSub.getFollowing();
-                // Не рекомендовать самого себя и тех, на кого уже подписан
-                if (!recommendedUser.getId().equals(userId) && !userFollowingIds.contains(recommendedUser.getId())) {
-                    recommendations.add(recommendedUser);
-                }
-            }
-        }
+        List<User> allUsers = userRepository.findAll();
+        List<User> recommendations = allUsers.stream()
+                .filter(u -> !u.getId().equals(userId))
+                .limit(5)
+                .collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
         response.put("userId", userId);
@@ -102,7 +90,7 @@ public class SocialBusinessController {
         return ResponseEntity.ok(response);
     }
 
-    // 4️⃣ Поиск по контенту (Post + Comment)
+    // 4️ Поиск по контенту (Post + Comment)
     @GetMapping("/search/content")
     public ResponseEntity<?> searchContent(@RequestParam String keyword) {
         List<Post> posts = postRepository.findAll().stream()
@@ -123,7 +111,7 @@ public class SocialBusinessController {
         return ResponseEntity.ok(response);
     }
 
-    // 5️⃣ Деактивация пользователя (ВСЕ сущности)
+    // 5️ Деактивация пользователя (ВСЕ сущности)
     @DeleteMapping("/user/{userId}/deactivate")
     @Transactional
     public ResponseEntity<?> deactivateUser(@PathVariable Long userId) {
