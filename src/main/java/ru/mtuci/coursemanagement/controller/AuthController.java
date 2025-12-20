@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,107 +24,56 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService users;
-    private final StudentRepository studentRepository; // ДОБАВЬТЕ эту строку
+    private final StudentRepository studentRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Веб-страница логина
+    // ==== ВЕБ-СТРАНИЦЫ ====
+
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(Model model) {
         return "login";
     }
 
-    // Веб-логин
-    @PostMapping("/login")
-    public String doLogin(@RequestParam String username,
-                          @RequestParam String password,
-                          HttpServletRequest req,
-                          Model model) {
-        try {
-            Optional<User> opt = users.findByUsername(username);
-            if (opt.isPresent()) {
-                User u = opt.get();
-                if (u.getPassword().equals(password)) {
-                    log.info("User {} logged in with password {}", username, password);
-                    HttpSession s = req.getSession(true);
-                    s.setAttribute("username", username);
-                    s.setAttribute("role", u.getRole());
-                    s.setAttribute("userId", u.getId()); // ВАЖНО: сохраняем ID пользователя
-                    return "redirect:/";
-                }
-            }
-            model.addAttribute("error", "Неверные учетные данные");
-            return "login";
-        } catch (Exception e) {
-            log.error("Login error for user {}: {}", username, e.getMessage());
-            model.addAttribute("error", "Ошибка при входе: " + e.getMessage());
-            return "login";
-        }
+    @GetMapping("/register")
+    public String registerPage() {
+        return "login"; // Та же страница, что и login
     }
 
-    // API логин для Postman
-    @PostMapping("/api/auth/login")
-    @ResponseBody
-    public ResponseEntity<?> apiLogin(@RequestParam String username,
-                                      @RequestParam String password,
-                                      HttpServletRequest req) {
-        try {
-            Optional<User> opt = users.findByUsername(username);
-            if (opt.isPresent()) {
-                User u = opt.get();
-                if (u.getPassword().equals(password)) {
-                    log.info("User {} logged in via API", username);
-                    HttpSession s = req.getSession(true);
-                    s.setAttribute("username", username);
-                    s.setAttribute("role", u.getRole());
-                    s.setAttribute("userId", u.getId()); // ВАЖНО: сохраняем ID пользователя
-
-                    // Возвращаем JSON ответ
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("status", "success");
-                    response.put("message", "Login successful");
-                    response.put("username", username);
-                    response.put("role", u.getRole());
-                    response.put("userId", u.getId());
-                    return ResponseEntity.ok(response);
-                }
-            }
-
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "Invalid credentials");
-            return ResponseEntity.status(401).body(errorResponse);
-
-        } catch (Exception e) {
-            log.error("API Login error for user {}: {}", username, e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "Login error: " + e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
-        }
-    }
-
-    // Веб-регистрация
+    // ==== ВЕБ-РЕГИСТРАЦИЯ ====
     @PostMapping("/register")
     public String register(@RequestParam String username,
                            @RequestParam String password,
                            @RequestParam(required = false, defaultValue = "STUDENT") String role,
-                           Model model) {
+                           Model model,
+                           HttpServletRequest request) {
         try {
-            // Проверяем, не существует ли уже пользователь с таким именем
+            log.info("Attempting registration for user: {}", username);
+
+            // 1. Проверка существования пользователя
             if (users.findByUsername(username).isPresent()) {
                 model.addAttribute("error", "Пользователь с таким именем уже существует");
                 return "login";
             }
 
-            // Создаем нового пользователя
+            // 2. Проверка пароля
+            if (!isPasswordValid(password)) {
+                model.addAttribute("error", "Пароль должен содержать минимум 6 символов, включая цифры и буквы");
+                return "login";
+            }
+
+            // 3. Хеширование пароля
+            String encodedPassword = passwordEncoder.encode(password);
+
+            // 4. Создание пользователя
             User newUser = new User();
             newUser.setUsername(username);
-            newUser.setPassword(password);
+            newUser.setPassword(encodedPassword);
             newUser.setRole(role);
 
             User savedUser = users.save(newUser);
             log.info("New user registered: {} with role {}", username, role);
 
-            // АВТОМАТИЧЕСКОЕ СОЗДАНИЕ СТУДЕНТА ЕСЛИ РОЛЬ STUDENT
+            // 5. Автоматическое создание студента
             if ("STUDENT".equals(role)) {
                 Student student = new Student();
                 student.setName(username);
@@ -133,51 +83,64 @@ public class AuthController {
                 log.info("Student record created for user: {}", username);
             }
 
-            return "redirect:/login?success=Registration successful";
+            // 6. Автоматический вход после регистрации
+            HttpSession session = request.getSession(true);
+            session.setAttribute("username", username);
+            session.setAttribute("role", role);
+            session.setAttribute("userId", savedUser.getId());
+
+            return "redirect:/";
 
         } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity error during registration: {}", e.getMessage());
-            model.addAttribute("error", "Ошибка базы данных: пользователь с таким именем уже существует");
+            log.error("Data integrity error: {}", e.getMessage());
+            model.addAttribute("error", "Пользователь с таким именем уже существует");
             return "login";
         } catch (Exception e) {
-            log.error("Registration error for user {}: {}", username, e.getMessage());
+            log.error("Registration error: {}", e.getMessage());
             model.addAttribute("error", "Ошибка при регистрации: " + e.getMessage());
             return "login";
         }
     }
 
-    // API регистрация для Postman
+    // ==== API РЕГИСТРАЦИЯ ====
     @PostMapping("/api/auth/register")
     @ResponseBody
     public ResponseEntity<?> apiRegister(@RequestParam String username,
                                          @RequestParam String password,
                                          @RequestParam(required = false, defaultValue = "STUDENT") String role) {
         try {
-            // Проверяем, не существует ли уже пользователь
+            log.info("API registration attempt for: {}", username);
+
             if (users.findByUsername(username).isPresent()) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("status", "error");
-                errorResponse.put("message", "User already exists");
-                return ResponseEntity.status(409).body(errorResponse);
+                Map<String, String> error = new HashMap<>();
+                error.put("status", "error");
+                error.put("message", "User already exists");
+                return ResponseEntity.status(409).body(error);
             }
 
-            // Создаем нового пользователя
+            if (!isPasswordValid(password)) {
+                Map<String, String> error = new HashMap<>();
+                error.put("status", "error");
+                error.put("message", "Password must contain at least 6 characters with numbers and letters");
+                return ResponseEntity.status(400).body(error);
+            }
+
+            String encodedPassword = passwordEncoder.encode(password);
+
             User newUser = new User();
             newUser.setUsername(username);
-            newUser.setPassword(password);
+            newUser.setPassword(encodedPassword);
             newUser.setRole(role);
 
             User savedUser = users.save(newUser);
-            log.info("New user registered via API: {} with role {}", username, role);
+            log.info("API registration successful: {}", username);
 
-            // АВТОМАТИЧЕСКОЕ СОЗДАНИЕ СТУДЕНТА ЕСЛИ РОЛЬ STUDENT
             if ("STUDENT".equals(role)) {
                 Student student = new Student();
                 student.setName(username);
                 student.setEmail(username + "@example.com");
                 student.setUserId(savedUser.getId());
                 studentRepository.save(student);
-                log.info("Student record created for user: {}", username);
             }
 
             Map<String, Object> response = new HashMap<>();
@@ -186,40 +149,58 @@ public class AuthController {
             response.put("username", username);
             response.put("role", role);
             response.put("userId", savedUser.getId());
+
             return ResponseEntity.ok(response);
 
-        } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity error during API registration: {}", e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "User already exists");
-            return ResponseEntity.status(409).body(errorResponse);
         } catch (Exception e) {
-            log.error("API Registration error for user {}: {}", username, e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "Registration error: " + e.getMessage());
-            return ResponseEntity.status(500).body(errorResponse);
+            log.error("API registration error: {}", e.getMessage());
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", "Registration error: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
 
+    // ==== ВЕБ-ЛОГАУТ ====
     @GetMapping("/logout")
     public String logout(HttpServletRequest req) {
-        HttpSession s = req.getSession(false);
-        if (s != null) s.invalidate();
-        return "redirect:/login";
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        return "redirect:/login?logout";
     }
 
-    // API logout для Postman
+    // ==== API ЛОГАУТ ====
     @PostMapping("/api/auth/logout")
     @ResponseBody
     public ResponseEntity<?> apiLogout(HttpServletRequest req) {
-        HttpSession s = req.getSession(false);
-        if (s != null) s.invalidate();
+        HttpSession session = req.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
         response.put("message", "Logout successful");
         return ResponseEntity.ok(response);
+    }
+
+    // ==== МЕТОД ПРОВЕРКИ ПАРОЛЯ ====
+    private boolean isPasswordValid(String password) {
+        if (password == null || password.length() < 6) {
+            return false;
+        }
+
+        boolean hasDigit = false;
+        boolean hasLetter = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isDigit(c)) hasDigit = true;
+            if (Character.isLetter(c)) hasLetter = true;
+            if (hasDigit && hasLetter) return true;
+        }
+
+        return false;
     }
 }

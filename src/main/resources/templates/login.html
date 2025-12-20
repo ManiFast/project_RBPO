@@ -2,46 +2,71 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Вход</title>
+    <title>Вход и регистрация</title>
     <style>
-        .error {
-            color: red;
-            background: #ffe6e6;
-            padding: 10px;
-            border: 1px solid red;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        .success {
-            color: green;
-            background: #e6ffe6;
-            padding: 10px;
-            border: 1px solid green;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
+        .error { color: red; background: #ffe6e6; padding: 10px; border: 1px solid red; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; background: #e6ffe6; padding: 10px; border: 1px solid green; border-radius: 5px; margin: 10px 0; }
+        .form-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
-<h3>Вход</h3>
+<h2>Вход в систему</h2>
 
-<!-- Показываем сообщения об ошибках -->
+<!-- Сообщения об ошибках -->
+<div th:if="${param.error}" class="error">
+    Неверные имя пользователя или пароль!
+</div>
+<div th:if="${param.logout}" class="success">
+    Вы успешно вышли из системы.
+</div>
 <div th:if="${error}" class="error" th:text="${error}"></div>
 <div th:if="${param.success}" class="success" th:text="${param.success}"></div>
 
-<form method="post" action="/login">
-    <label>Логин: <input type="text" name="username" required/></label><br/>
-    <label>Пароль: <input type="password" name="password" required/></label><br/>
-    <button type="submit">Войти</button>
-</form>
+<!-- Форма входа (Spring Security) -->
+<div class="form-section">
+    <h3>Вход</h3>
+    <form method="post" action="/login">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div>
+            <label>Имя пользователя:</label><br/>
+            <input type="text" name="username" required/>
+        </div>
+        <div>
+            <label>Пароль:</label><br/>
+            <input type="password" name="password" required/>
+        </div>
+        <div>
+            <button type="submit">Войти</button>
+        </div>
+    </form>
+</div>
 
-<hr/>
-<h4>Регистрация (демо A04: можно указать роль)</h4>
-<form method="post" action="/register">
-    <input name="username" placeholder="username" required/>
-    <input name="password" placeholder="password" required/>
-    <input name="role" placeholder="role (STUDENT/TEACHER)" value="STUDENT"/>
-    <button type="submit">Зарегистрироваться</button>
-</form>
+<!-- Форма регистрации -->
+<div class="form-section">
+    <h3>Регистрация</h3>
+    <form method="post" action="/register">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div>
+            <label>Имя пользователя:</label><br/>
+            <input type="text" name="username" required/>
+        </div>
+        <div>
+            <label>Пароль (мин. 6 символов, цифры и буквы):</label><br/>
+            <input type="password" name="password" required/>
+        </div>
+        <div>
+            <label>Роль:</label><br/>
+            <select name="role">
+                <option value="STUDENT" selected>Студент</option>
+                <option value="TEACHER">Преподаватель</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Зарегистрироваться</button>
+        </div>
+    </form>
+</div>
+
+<p><a href="/">На главную</a></p>
 </body>
 </html>

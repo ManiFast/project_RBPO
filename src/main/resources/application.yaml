@@ -1,16 +1,25 @@
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/social_network  # Новое имя!
+#    username: postgres
+#    password: password  #пароль
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+
 spring:
   datasource:
-    url: jdbc:h2:file:./data/socialnetwork
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
-  h2:
-    console:
-      enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    url: jdbc:postgresql://localhost:5432/social_network
+    username: postgres
+    password: ${DB_PASSWORD}  #из переменной окр
+
+logging:
+  level:
+    ru.mtuci.coursemanagement: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
