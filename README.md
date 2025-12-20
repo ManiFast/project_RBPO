@@ -35,3 +35,5 @@
 - **Документация API:** Postman
 
 https://github.com/ManiFast/project_RBPO/blob/lab3/image_2025-12-20_11-55-18.png
+
+<img src="image_2025-12-20_11-55-18.png">
