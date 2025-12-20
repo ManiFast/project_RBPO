@@ -34,7 +34,4 @@
 - **Сборка:** Maven
 - **Документация API:** Postman
 
-## Установка и запуск
-1. Установите PostgreSQL и создайте базу данных:
-   ```sql
-   CREATE DATABASE social_network;
+https://github.com/ManiFast/project_RBPO/blob/lab3/image_2025-12-20_11-55-18.png
