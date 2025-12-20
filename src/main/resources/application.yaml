@@ -1,0 +1,19 @@
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/social_network  # Новое имя!
+#    username: postgres
+#    password: password  #пароль
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/social_network
+    username: postgres
+    password: ${DB_PASSWORD}  #из переменной окр
