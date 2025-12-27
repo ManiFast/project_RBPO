@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Социальная сеть</title>
+    <style>
+        .post {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+<h2>Социальная сеть</h2>
+
+<!-- Форма создания поста -->
+<div>
+    <h3>Создать пост</h3>
+    <form method="post" action="/api/social/posts">
+        <textarea name="content" placeholder="Что у вас нового?" rows="4" cols="50" required></textarea><br/>
+        <input type="number" name="authorId" placeholder="ID автора" required/>
+        <button type="submit">Опубликовать</button>
+    </form>
+</div>
+
+<hr/>
+
+<!-- Список постов -->
+<div>
+    <h3>Все посты</h3>
+
+    <!-- Безопасная проверка на пустоту -->
+    <div th:if="${posts != null and !posts.isEmpty()}">
+        <div th:each="post : ${posts}" class="post">
+            <div>
+                <strong>Автор:</strong>
+                <span th:if="${post.author != null}" th:text="${post.author.username}">User</span>
+                <span th:if="${post.author == null}">Неизвестный автор</span>
+                <br/>
+                <strong>Содержание:</strong> <span th:text="${post.content}">Content</span><br/>
+                <strong>Дата:</strong> <span th:text="${post.createdAt}">Date</span>
+            </div>
+
+            <!-- Лайки -->
+            <div style="margin-top: 10px;">
+                <form method="post" th:action="@{/api/social/posts/{id}/like(id=${post.id})}">
+                    <button type="submit">❤️ Лайк</button>
+                </form>
+            </div>
+
+            <!-- Комментарии -->
+            <div style="margin-top: 10px;">
+                <h4>Комментарии:</h4>
+
+                <!-- Список комментариев -->
+                <div th:if="${commentsByPost != null and commentsByPost.get(post.id) != null}">
+                    <div th:each="comment : ${commentsByPost.get(post.id)}" style="border-left: 2px solid #007bff; padding-left: 10px; margin: 5px 0;">
+                        <strong th:text="${comment.author.username}">User</strong>:
+                        <span th:text="${comment.content}">Comment</span>
+                        <br/>
+                        <small th:text="${comment.createdAt}">Date</small>
+                    </div>
+                </div>
+
+                <!-- Форма комментария -->
+                <form method="post" action="/api/social/comments" style="margin-top: 10px;">
+                    <input type="hidden" name="postId" th:value="${post.id}"/>
+                    <textarea name="content" placeholder="Ваш комментарий..." rows="2" cols="40" required></textarea>
+                    <button type="submit">💬 Комментировать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщение если постов нет -->
+    <div th:if="${posts == null or posts.isEmpty()}">
+        <p>Пока нет постов. Будьте первым!</p>
+    </div>
+</div>
+
+<hr/>
+
+<!-- Подписки -->
+<div>
+    <h3>Подписки</h3>
+    <form method="post" th:action="@{/api/social/users/{id}/follow}">
+        <input type="number" name="userId" placeholder="ID пользователя для подписки" required/>
+        <button type="submit">📋 Подписаться</button>
+    </form>
+    <p><small>Для демо: введите ID существующего пользователя</small></p>
+</div>
+
+<p><a href="/">🏠 На главную</a></p>
+
+</body>
+</html>
