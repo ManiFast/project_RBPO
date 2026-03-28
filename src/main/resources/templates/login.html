@@ -3,31 +3,22 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Вход</title>
-    <style>
-        .error {
-            color: red;
-            background: #ffe6e6;
-            padding: 10px;
-            border: 1px solid red;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        .success {
-            color: green;
-            background: #e6ffe6;
-            padding: 10px;
-            border: 1px solid green;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-    </style>
 </head>
 <body>
 <h3>Вход</h3>
 
-<!-- Показываем сообщения об ошибках -->
-<div th:if="${error}" class="error" th:text="${error}"></div>
-<div th:if="${param.success}" class="success" th:text="${param.success}"></div>
+<div th:if="${param.error}">
+    <p>Неверный логин или пароль</p>
+</div>
+<div th:if="${param.logout}">
+    <p>Вы вышли из системы</p>
+</div>
+<div th:if="${param.success}">
+    <p th:text="${param.success}"></p>
+</div>
+<div th:if="${error}">
+    <p th:text="${error}"></p>
+</div>
 
 <form method="post" action="/login">
     <label>Логин: <input type="text" name="username" required/></label><br/>
@@ -36,12 +27,14 @@
 </form>
 
 <hr/>
-<h4>Регистрация (демо A04: можно указать роль)</h4>
+
+<h4>Регистрация</h4>
 <form method="post" action="/register">
     <input name="username" placeholder="username" required/>
     <input name="password" placeholder="password" required/>
-    <input name="role" placeholder="role (STUDENT/TEACHER)" value="STUDENT"/>
     <button type="submit">Зарегистрироваться</button>
 </form>
+
+<p>Пароль: минимум 8 символов, заглавная, строчная буква, цифра и спецсимвол.</p>
 </body>
 </html>
