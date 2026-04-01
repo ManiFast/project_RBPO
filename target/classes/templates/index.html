@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Course Management System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        .endpoint { margin: 10px 0; padding: 8px; background: white; border-radius: 4px; }
+        code { background: #eee; padding: 2px 6px; border-radius: 3px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<h1>📚 Система управления курсами</h1>
+
+<div class="section">
+    <h2>🚀 Простые API эндпоинты (Лаба 1)</h2>
+
+    <h3>HelloController:</h3>
+    <div class="endpoint">
+        <a href="/api/hello" target="_blank">GET /api/hello</a> - Главная API
+    </div>
+    <div class="endpoint">
+        <a href="/api/hello/world" target="_blank">GET /api/hello/world</a> - Приветствие
+    </div>
+    <div class="endpoint">
+        <a href="/api/hello/user" target="_blank">GET /api/hello/user</a> - Привет пользователю
+    </div>
+    <div class="endpoint">
+        <a href="/api/hello/status" target="_blank">GET /api/hello/status</a> - Статус API
+    </div>
+
+    <h3>SimpleController (CRUD демо):</h3>
+    <div class="endpoint">
+        <a href="/api/demo/info" target="_blank">GET /api/demo/info</a> - Информация
+    </div>
+    <div class="endpoint">
+        <a href="/api/demo/user/123" target="_blank">GET /api/demo/user/123</a> - Получить пользователя (с параметром пути)
+    </div>
+    <div class="endpoint">
+        <a href="/api/demo/search?name=Иван&page=2" target="_blank">GET /api/demo/search?name=Иван&page=2</a> - Поиск (query параметры)
+    </div>
+    <div class="endpoint">
+        POST /api/demo/create - Создать объект (JSON body)
+    </div>
+    <div class="endpoint">
+        PUT /api/demo/update/456 - Обновить объект
+    </div>
+    <div class="endpoint">
+        DELETE /api/demo/delete/789 - Удалить объект
+    </div>
+</div>
+
+<div class="section">
+    <h2>🔐 Аутентификация</h2>
+    <p><a href="/login">Войти в систему</a></p>
+    <p>Демо-пользователи: <code>teacher/password</code> (роль TEACHER), <code>student/password</code> (роль STUDENT)</p>
+</div>
+
+<div class="section">
+    <h2>📊 Основные модули</h2>
+    <p><a href="/students">👨‍🎓 Студенты</a> - Управление студентами</p>
+<!--    <p><a href="/courses">📚 Курсы</a> - Управление курсами</p>-->
+    <p><a href="/social">💬 Социальная сеть</a> - Социальные функции</p>
+</div>
+
+<div class="section">
+    <h2>🛠️ Инструменты</h2>
+    <p><strong>Postman коллекция:</strong> Импортируйте файл из <code>postman/</code></p>
+    <p><strong>База данных H2 Console:</strong> <a href="/h2-console" target="_blank">/h2-console</a> (JDBC URL: <code>jdbc:h2:file:./data/socialnetwork</code>)</p>
+</div>
+
+<div class="section">
+    <h2>📝 Пример JSON для POST запроса:</h2>
+    <pre><code>
+{
+  "name": "Тестовый пользователь",
+  "email": "test@example.ru",
+  "age": 25,
+  "city": "Москва"
+}
+    </code></pre>
+</div>
+
+<footer style="margin-top: 40px; color: #666; font-size: 0.9em;">
+    <p>Лабораторная работа по Spring Boot | MTUCI</p>
+</footer>
+</body>
+</html>

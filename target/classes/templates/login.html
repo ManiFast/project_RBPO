@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Вход</title>
+</head>
+<body>
+<h3>Вход</h3>
+
+<div th:if="${param.error}">
+    <p>Неверный логин или пароль</p>
+</div>
+<div th:if="${param.logout}">
+    <p>Вы вышли из системы</p>
+</div>
+<div th:if="${param.success}">
+    <p th:text="${param.success}"></p>
+</div>
+<div th:if="${error}">
+    <p th:text="${error}"></p>
+</div>
+
+<form method="post" action="/login">
+    <label>Логин: <input type="text" name="username" required/></label><br/>
+    <label>Пароль: <input type="password" name="password" required/></label><br/>
+    <button type="submit">Войти</button>
+</form>
+
+<hr/>
+
+<h4>Регистрация</h4>
+<form method="post" action="/register">
+    <input name="username" placeholder="username" required/>
+    <input name="password" placeholder="password" required/>
+    <button type="submit">Зарегистрироваться</button>
+</form>
+
+<p>Пароль: минимум 8 символов, заглавная, строчная буква, цифра и спецсимвол.</p>
+</body>
+</html>
