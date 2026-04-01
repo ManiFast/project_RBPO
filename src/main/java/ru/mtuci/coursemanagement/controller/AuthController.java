@@ -1,7 +1,8 @@
 package ru.mtuci.coursemanagement.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class AuthController {
                                    @RequestParam String password,
                                    Model model) {
         try {
-            userService.registerUser(username, password);
+            userService.register(username, password);
             return "redirect:/login?success=Регистрация прошла";
         } catch (IllegalArgumentException ex) {
             model.addAttribute("error", ex.getMessage());
@@ -44,7 +45,7 @@ public class AuthController {
     public ResponseEntity<?> registerApi(@RequestParam String username,
                                          @RequestParam String password) {
         try {
-            userService.registerUser(username, password);
+            userService.register(username, password);
 
             Map<String, Object> body = new LinkedHashMap<>();
             body.put("status", "success");

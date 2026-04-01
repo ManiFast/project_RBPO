@@ -13,44 +13,49 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class UserService {
 
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-            "^(?=.*[a-zа-я])(?=.*[A-ZА-Я])(?=.*\\d)(?=.*[^A-Za-zА-Яа-я\\d]).{8,}$"
-    );
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private static final Pattern PASSWORD_PATTERN =
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$");
+
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username == null ? null : username.trim());
+        return userRepository.findByUsername(username);
     }
 
-    public User registerUser(String username, String rawPassword) {
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public boolean isPasswordStrong(String password) {
+        return password != null && PASSWORD_PATTERN.matcher(password).matches();
+    }
+
+    public User register(String username, String rawPassword) {
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Введите логин");
+            throw new IllegalArgumentException("Логин пустой");
         }
 
-        String normalizedUsername = username.trim();
-
-        if (userRepository.findByUsername(normalizedUsername).isPresent()) {
-            throw new IllegalArgumentException("Такой логин уже занят");
+        if (findByUsername(username).isPresent()) {
+            throw new IllegalArgumentException("Пользователь уже есть");
         }
 
-        validatePassword(rawPassword);
+        if (!isPasswordStrong(rawPassword)) {
+            throw new IllegalArgumentException("Слабый пароль");
+        }
 
         User user = new User();
-        user.setUsername(normalizedUsername);
+        user.setUsername(username.trim());
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setRole("USER");
 
         return userRepository.save(user);
     }
 
-    public void validatePassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("Введите пароль");
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("Пользователь не найден");
         }
-        if (!PASSWORD_PATTERN.matcher(rawPassword).matches()) {
-            throw new IllegalArgumentException("Пароль слишком простой");
-        }
+        userRepository.deleteById(id);
     }
 }
