@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="afe95903-9460-405e-b4ed-8329887dda33" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_LAB6.txt" beforeDir="false" afterPath="$PROJECT_DIR$/README_LAB6.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/socialnetwork.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/socialnetwork.mv.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/socialnetwork.trace.db" beforeDir="false" afterPath="$PROJECT_DIR$/data/socialnetwork.trace.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/ru/mtuci/coursemanagement/CourseManagementApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/mtuci/coursemanagement/CourseManagementApplicationTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +46,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Spring Boot.CourseManagementApplication.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "lab5",
+    "git-widget-placeholder": "lab6",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "nodejs_package_manager_path": "npm",

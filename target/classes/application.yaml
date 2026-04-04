@@ -31,4 +31,10 @@ jwt:
   refresh-ttl-days: 7
 
 server:
-  port: 8080
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: file:C:/Users/Admin/Desktop/Matorin/project_RBPO/certs/out/rbpo-server-1БИК23522.jks
+    key-store-type: PKCS12
+    key-store-password: ServerPass_ChangeMe_123!
+    key-alias: rbposrv1бик23522
