@@ -1,0 +1,11 @@
+Как импортировать Root CA в доверенные на Windows 11
+
+1. Win + R
+2. Ввести certmgr.msc
+3. Trusted Root Certification Authorities
+4. Certificates
+5. Right click -> All Tasks -> Import
+6. Выбрать файл rbpo-root-<studentId>.crt
+7. Завершить импорт
+
+После этого браузер будет доверять сертификату сервера, который подписан этой цепочкой.
