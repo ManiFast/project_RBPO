@@ -1,5 +1,6 @@
 package ru.mtuci.coursemanagement.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,12 +18,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 100)
     private String username;
 
-    @Column
+    @JsonIgnore
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column
-    private String role;
+    @Column(nullable = false, length = 30)
+    private String role = "USER";
 }

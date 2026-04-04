@@ -1,0 +1,57 @@
+Проверка 6-й лабы
+
+1. Сгенерировать цепочку сертификатов
+В PowerShell из корня проекта:
+powershell -ExecutionPolicy Bypass -File .\certs\generate-chain.ps1 -StudentId 123456
+
+Проверить длину цепочки:
+keytool -list -v -keystore .\certs\out\rbpo-server-123456.jks -storepass ServerPass_ChangeMe_123!
+Для alias сервера должна быть цепочка длиной 3.
+
+2. Переключить сервис на HTTPS
+Скопируй настройки из application-lab6-example.yaml в свой application.yaml.
+Подставь:
+- свой StudentId в SSL_KEYSTORE_PATH и SSL_KEY_ALIAS
+- свой пароль keystore
+Потом запусти приложение.
+
+3. Проверить HTTPS
+Открыть:
+https://localhost:8443/login
+До доверия браузер покажет предупреждение.
+После импорта rootCA.crt в доверенные корневые центры предупреждение должно исчезнуть.
+
+4. Добавить корневой сертификат в доверенные на Windows
+Win + R -> certmgr.msc
+Trusted Root Certification Authorities -> Certificates -> Import
+Выбрать файл:
+.\certs\out\rbpo-root-123456.crt
+
+5. Проверить CI
+Залить workflow в:
+.github/workflows/ci.yml
+На GitHub добавить:
+- Secret SSL_KEYSTORE_BASE64 = base64 от server.jks
+- Secret SSL_KEYSTORE_PASSWORD = пароль server.jks
+- Secret JWT_SECRET = JWT secret
+- Variable SSL_KEY_ALIAS = alias серверного ключа, например rbpoSrv123456
+
+Как сделать base64 в PowerShell:
+[Convert]::ToBase64String([IO.File]::ReadAllBytes(".\certs\out\rbpo-server-123456.jks")) | Set-Clipboard
+
+После push зайти:
+GitHub -> Actions -> CI
+Проверить, что:
+- compile прошёл
+- test прошёл
+- package прошёл
+- jar загружен как artifact
+
+6. Что показать преподавателю
+- команды генерации сертификатов
+- что в DName и именах есть номер студенческого
+- цепочку длиной 3 через keytool -list -v
+- https://localhost:8443
+- импорт Root CA в доверенные
+- workflow CI и Secrets/Variables
+- артефакт в GitHub Actions

@@ -1,0 +1,6 @@
+# Lab 6 - secrets and private key stores
+certs/out/
+*.jks
+*.p12
+*.pfx
+*.csr
